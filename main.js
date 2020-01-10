@@ -12,6 +12,7 @@ var templateHTML = (title, list, body) => {
     <body>
         <h1><a href="/">WEB2</a></h1>
         ${list}
+        <p><a href="/create">create</a></a>
         ${body}
     </body>
     </html>
@@ -28,9 +29,8 @@ var templateList = (filelist) => {
 var app = http.createServer(function(request,response){
     var _url = request.url;
     var queryData = url.parse(_url, true).query;
-    var pathName = url.parse(_url, true).pathname;
-
-    if(pathName === '/'){
+    var pathname = url.parse(_url, true).pathname;
+    if(pathname === '/'){
         if(queryData.id === undefined){
             fs.readdir('./data', (err, filelist) => {
                 var title = 'Welcome';
@@ -51,7 +51,21 @@ var app = http.createServer(function(request,response){
                 });
             });
         }
-    }else{
+    } else if (pathname === '/create') {
+        fs.readdir('./data', (err, filelist) => {
+            var title = 'WEB - create';
+            var list = templateList(filelist);
+            var template = templateHTML(title, list, `
+            <form action="http://localhost:3000/process_create" method="post">
+                <p><input type="text" name="title" placeholder="title" /></p>
+                <p><textarea name="description" placeholder="description" ></textarea></p>
+                <p><input type="submit" /></p>
+            </form>
+            `);
+            response.writeHead(200);
+            response.end(template);
+        });
+    }else {
         response.writeHead(404);
         response.end('Not Found');
     }
