@@ -86,7 +86,7 @@ var app = http.createServer(function(request,response){
                 response.end();
             });
         });
-    }else if (pathname === '/update'){
+    } else if (pathname === '/update'){
         fs.readdir('./data', (err, filelist) => {
             var list = templateList(filelist);
             fs.readFile(`data/${queryData.id}`, (err, description) => {
@@ -102,6 +102,24 @@ var app = http.createServer(function(request,response){
                     );
                 response.writeHead(200);
                 response.end(template);
+            });
+        });
+    } else if (pathname === '/update_process') {
+        var body = '';
+        request.on('data',(data) => {
+            body = body + data;
+        });
+        request.on('end', () => {
+            var post = qs.parse(body);
+            var id = post.id;
+            var title = post.title;
+            var description = post.description;
+            
+            fs.rename(`data/${id}`, `data/${title}`, (err) => {
+                fs.writeFile(`data/${title}`, description, (err) => {
+                    response.writeHead(302, {'Location':`/?id=${title}`});
+                    response.end();
+                });
             });
         });
     } else {
