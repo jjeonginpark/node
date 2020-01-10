@@ -74,15 +74,16 @@ var app = http.createServer(function(request,response){
         });
         request.on('end', () => {
             var post = qs.parse(body);
-            console.log(post);
+            var title = post.title;
+            var description = post.description;
+            fs.writeFile(`data/${title}`, description, (err) => {
+                response.writeHead(302, {'Location':`/?id=${title}`});
+                response.end();
+            });
         });
-        response.writeHead(200);
-        response.end('success');
-
     }else {
         response.writeHead(404);
         response.end('Not Found');
     }
-    
 });
 app.listen(3000);
