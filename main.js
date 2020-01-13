@@ -4,6 +4,7 @@ var url = require('url');
 var qs = require('querystring');
 
 var template = require('./lib/template.js');
+var path = require('path');
 
 
 var app = http.createServer(function(request,response){
@@ -26,7 +27,8 @@ var app = http.createServer(function(request,response){
         }else{
             fs.readdir('./data', (err, filelist) => {
                 var list = template.list(filelist);
-                fs.readFile(`data/${queryData.id}`, (err, description) => {
+                var filteredId = path.parse(queryData.id).base;
+                fs.readFile(`data/${filteredId}`, (err, description) => {
                     var title = queryData.id;
                     var html = template.HTML(title, list, 
                         `<h2>${title}</h2><p>${description}</p>`,
@@ -72,7 +74,8 @@ var app = http.createServer(function(request,response){
     } else if (pathname === '/update'){
         fs.readdir('./data', (err, filelist) => {
             var list = template.list(filelist);
-            fs.readFile(`data/${queryData.id}`, (err, description) => {
+            var filteredId = path.parse(queryData.id).base;
+            fs.readFile(`data/${filteredId}`, (err, description) => {
                 var title = queryData.id;
                 var html = template.HTML(title, list, 
                     `<form action="/update_process" method="post">
@@ -97,8 +100,8 @@ var app = http.createServer(function(request,response){
             var id = post.id;
             var title = post.title;
             var description = post.description;
-
-            fs.rename(`data/${id}`, `data/${title}`, (err) => {
+            var filteredId = path.parse(id).base;
+            fs.rename(`data/${filteredId}`, `data/${title}`, (err) => {
                 fs.writeFile(`data/${title}`, description, (err) => {
                     response.writeHead(302, {'Location':`/?id=${title}`});
                     response.end();
