@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
+var sanitizeHtml = require('sanitize-html');
 
 var template = require('./lib/template.js');
 var path = require('path');
@@ -26,16 +27,20 @@ var app = http.createServer(function(request,response){
             });
         }else{
             fs.readdir('./data', (err, filelist) => {
-                var list = template.list(filelist);
                 var filteredId = path.parse(queryData.id).base;
                 fs.readFile(`data/${filteredId}`, (err, description) => {
                     var title = queryData.id;
+                    var sanitizedTitle = sanitizeHtml(title);
+                    var sanitizedDescription = sanitizeHtml(description, {
+                        allowedTags : ['h1'],
+                    });
+                    var list = template.list(filelist);
                     var html = template.HTML(title, list, 
-                        `<h2>${title}</h2><p>${description}</p>`,
-                        `<a href="/create">create</a> 
-                        <a href="/update?id=${title}">update</a>
+                        `<h2>${sanitizedTitle}</h2><p>${sanitizedDescription}</p>`,
+                        `<a href="/create">create</a>
+                        <a href="/update?id=${sanitizedTitle}">update</a>
                         <form action="delete_process" method="post">
-                            <input type="hidden" name="id" value="${title}">
+                            <input type="hidden" name="id" value="${sanitizedTitle}">
                             <input type="submit" value="delete">
                         </form>`
                         );
