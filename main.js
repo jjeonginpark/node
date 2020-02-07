@@ -9,6 +9,10 @@ const qs = require('querystring');
 const sanitizeHtml = require('sanitize-html');
 const template = require('./lib/template.js');
 const path = require('path');
+var bodyParser = require('body-parser');
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', (request, response) => {
     fs.readdir('./data', (err, filelist) => {
@@ -61,6 +65,8 @@ app.get('/create', (request, response) => {
 })
 
 app.post('/create_process', (request, response) =>{
+
+    /*
     var body = '';
         request.on('data',(data) => {
             body = body + data;
@@ -70,9 +76,18 @@ app.post('/create_process', (request, response) =>{
             var title = post.title;
             var description = post.description;
             fs.writeFile(`data/${title}`, description, (err) => {
-                response.redirect('/');
+                response.writeHead(302, {'Location':`/?id=${title}`});
+                response.end();
             });
-    });
+        });
+    */
+       var post = request.body;
+       var title = post.title;
+       var description = post.description;
+       fs.writeFile(`data/${title}`, description, (err) => {
+           response.writeHead(302, {'Location':`/page/${title}`});
+           response.end();
+       });
 });
 
 app.get('/update/:pageId', (request, response) => {
