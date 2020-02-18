@@ -111,7 +111,7 @@ app.get('/update/:pageId', (request, response) => {
 })
 
 app.post('/update_process', (request, response) =>{
-    var body = '';
+    /* var body = '';
     request.on('data',(data) => {
         body = body + data;
     });
@@ -126,23 +126,30 @@ app.post('/update_process', (request, response) =>{
                 response.redirect('/');
             });
         });
-    });
+    }); */
+        var post = request.body;
+        var id = post.id;
+        var title = post.title;
+        var description = post.description;
+        var filteredId = path.parse(id).base;
+        fs.rename(`data/${filteredId}`, `data/${title}`, (err) => {
+            fs.writeFile(`data/${title}`, description, (err) => {
+                response.redirect(`/page/${title}`);
+            });
+        });
 });
 
 app.post('/delete_process', (request, response) =>{
-    var body = '';
-    request.on('data',(data) => {
-        body = body + data;
+
+    var post = request.body;
+    var id = post.id;
+    var filteredId = path.parse(id).base;
+    fs.unlink(`data/${filteredId}`, function(error){
+      response.redirect('/');
     });
-    request.on('end', () => {
-        var post = qs.parse(body);
-        var id = post.id;
-        var filereadId = path.parse(id).base;
-        fs.unlink(`data/${filereadId}`, (err) => {
-            response.redirect('/');
-        });
-    });
+
 });
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
